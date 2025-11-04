@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>College Hub — News & Study Partner Finder</title>
+    <style>
+        :root {
+            --accent: #2b7a78;
+            --muted: #65737e;
+            --bg: #f6f7f9
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            margin: 0;
+            background: var(--bg);
+            color: #0b1320
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--accent), #1f5a65);
+            color: white;
+            padding: 18px 20px
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 16px
+        }
+
+        nav {
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.15rem
+        }
+
+        .navlinks {
+            margin-left: auto;
+            display: flex;
+            gap: 10px
+        }
+
+        .btn {
+            background: white;
+            color: var(--accent);
+            border-radius: 8px;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 18px;
+            align-items: start
+        }
+
+        @media (max-width:980px) {
+            main {
+                grid-template-columns: 1fr
+            }
+
+            .right {
+                order: 2
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 6px 18px rgba(12, 18, 22, 0.06)
+        }
+
+        h2 {
+            margin: 0 0 10px 0
+        }
+
+        form.grid {
+            display: grid;
+            gap: 8px
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e3e6ea
+        }
+
+        textarea {
+            min-height: 90px
+        }
+
+        .small {
+            font-size: 0.9rem;
+            color: var(--muted)
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .news-item {
+            border-left: 4px solid var(--accent);
+            padding: 10px;
+            background: linear-gradient(180deg, #ffffff, #fbfdfe);
+            border-radius: 8px
+        }
+
+        .meta {
+            font-size: 0.85rem;
+            color: var(--muted)
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 8px;
+            border-radius: 999px;
+            background: #eef6f5;
+            color: var(--accent);
+            font-size: 0.85rem
+        }
+
+        .match {
+            background: #fff7e6;
+            border: 1px dashed #f5c16c
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .people {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .person {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #eef1f3
+        }
+
+        .avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: inline-grid;
+            place-items: center;
+            background: #dfeff0;
+            color: var(--accent);
+            font-weight: 700
+        }
+
+        footer {
+            opacity: 0.8;
+            color: #21313a;
+            padding: 22px;
+            text-align: center
+        }
+
+        .searchrow {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        a.smalllink {
+            font-size: 0.9rem;
+            color: var(--accent);
+            text-decoration: none
+        }
+
+        /* tiny modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(3, 6, 8, 0.45)
+        }
+
+        .modal.open {
+            display: flex
+        }
+
+        .modal .card {
+            width: 480px;
+            max-width: 94%
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="wrap">
+            <nav>
+                <div class="logo">College Hub</div>
+                <div class="muted" style="margin-left:12px">News • Events • Study Partners</div>
+                <div class="navlinks">
+                    <button class="btn" id="btn-add-news">Add News</button>
+                    <button class="btn" id="btn-find-partner">Find Partner</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="wrap">
+        <main>
+            <section>
+                <div class="card" style="margin-bottom:14px">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <h2>College News Portal</h2>
+                        <div class="small muted">Local only — stored in browser</div>
+                    </div>
+
+                    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+                        <input id="news-filter" placeholder="Search news or tag (e.g., exams, fest)" style="flex:1">
+                        <select id="news-sort">
+                            <option value="new">Newest first</option>
+                            <option value="old">Oldest first</option>
+                        </select>
+                        <button class="btn" id="btn-clear-news">Clear</button>
+                    </div>
+
+                    <div id="news-list" class="list"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Announcements / Events</h2>
+                    <p class="small">Use the "Add News" button on top or the quick form below to create an announcement.</p>
+
+                    <form id="quick-news" class="grid" onsubmit="return false;">
+                        <input id="q-title" placeholder="Title (e.g., Semester Exams Schedule)" required>
+                        <input id="q-tag" placeholder="Tag (comma-separated) — e.g., exams,placements,foss">
+                        <textarea id="q-body" placeholder="Short description" required></textarea>
+                        <div style="display:flex;gap:8px">
+                            <input id="q-author" placeholder="Posted by (name)" style="flex:1">
+                            <input id="q-date" type="date" style="width:170px">
+                        </div>
+                        <div style="display:flex;gap:8px;justify-content:flex-end">
+                            <button class="btn" id="btn-save-quick">Save Announcement</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <aside class="right">
+                <div class="card">
+                    <h2>Study Partner Finder</h2>
+                    <p class="small">Create a profile and find partners who match on subjects and availability.</p>
+
+                    <form id="profile-form" class="grid" onsubmit="return false;">
+                        <input id="p-name" placeholder="Your name" required>
+                        <input id="p-year" placeholder="Year / Semester (e.g., 3rd Year)">
+                        <input id="p-subjects" placeholder="Subjects (comma-separated, e.g., DS,OS,DBMS)" required>
+                        <input id="p-location" placeholder="Location / College block (optional)">
+                        <select id="p-mode">
+                            <option value="online">Online</option>
+                            <option value="offline">Offline</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                        <div style="display:flex;gap:8px">
+                            <input id="p-contact" placeholder="Contact (email/phone)" style="flex:1">
+                            <button class="btn" id="btn-save-profile">Save</button>
+                        </div>
+                    </form>
+
+                    <div style="margin-top:12px">
+                        <div class="searchrow" style="margin-bottom:8px">
+                            <input id="partner-filter-sub" placeholder="Filter subject e.g. DS" style="flex:1">
+                            <button class="btn" id="btn-find-matches">Find Matches</button>
+                        </div>
+                        <div id="people-list" class="people"></div>
+                    </div>
+                </div>
+
+                <div style="height:14px"></div>
+
+                <div class="card">
+                    <h2>Share / Deploy</h2>
+                    <p class="small">This site keeps data in your browser (localStorage). To make it publicly available via a link, deploy the files to GitHub Pages or Netlify — steps below.</p>
+                    <ol class="small">
+                        <li>Create a GitHub repo and push this file (index.html).</li>
+                        <li>In repo Settings → Pages, choose branch main and root — Save.</li>
+                        <li>After a minute, your site will be at username.github.io/repo-name</li>
+                    </ol>
+                    <p class="small muted">Note: For multi-user persistence (everyone sees same news & profiles), you'll need a backend (Firebase/Firestore or simple REST API).</p>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="wrap">College Hub • Demo site — localStorage demo • Built with HTML/CSS/JS</footer>
+    </div>
+
+    <!-- modal: Add News -->
+    <div id="modal-news" class="modal">
+        <div class="card">
+            <h2>Add Announcement / Event</h2>
+            <form id="form-news" class="grid" onsubmit="return false;">
+                <input id="n-title" placeholder="Title" required>
+                <input id="n-tag" placeholder="Tags (comma-separated)">
+                <textarea id="n-body" placeholder="Description" required></textarea>
+                <div style="display:flex;gap:8px">
+                    <input id="n-author" placeholder="Author">
+                    <input id="n-date" type="date">
+                </div>
+                <div style="display:flex;gap:8px;justify-content:flex-end">
+                    <button class="btn" id="btn-add">Add</button>
+                    <button class="btn" id="btn-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Simple storage keys
+        const NEWS_KEY = 'collegehub_news_v1';
+        const PEOPLE_KEY = 'collegehub_people_v1';
+
+        // Helpers
+        const $ = id => document.getElementById(id);
+        const readJSON = key => JSON.parse(localStorage.getItem(key) || '[]');
+        const writeJSON = (key, obj) => localStorage.setItem(key, JSON.stringify(obj));
+
+        // Seed demo data if empty (only once)
+        if (!localStorage.getItem('collegehub_seeded')) {
+            writeJSON(NEWS_KEY, [{
+                    id: cryptoRandomId(),
+                    title: 'Freshers Meet in Auditorium',
+                    tags: ['fest', 'college'],
+                    body: 'Welcome event for new students on Sep 10 at 5pm. Snacks provided.',
+                    author: 'Student Council',
+                    date: todayISO(-10)
+                },
+                {
+                    id: cryptoRandomId(),
+                    title: 'Sem 4 Exams — Time Table',
+                    tags: ['exams'],
+                    body: 'End-semesters start Nov 12. Check department noticeboard.',
+                    author: 'Exam Cell',
+                    date: todayISO(-2)
+                }
+            ]);
+            writeJSON(PEOPLE_KEY, [{
+                    id: cryptoRandomId(),
+                    name: 'Asha R',
+                    year: '2nd',
+                    subjects: ['DS', 'OS'],
+                    location: 'Block A',
+                    mode: 'offline',
+                    contact: '@asha'
+                },
+                {
+                    id: cryptoRandomId(),
+                    name: 'Rohit P',
+                    year: '3rd',
+                    subjects: ['DBMS', 'SE'],
+                    location: 'Hostel 5',
+                    mode: 'online',
+                    contact: 'rohit@mail'
+                }
+            ]);
+            localStorage.setItem('collegehub_seeded', '1');
+        }
+
+        // Utility functions
+        function cryptoRandomId() {
+            return Math.random().toString(36).slice(2, 9)
+        }
+
+        function todayISO(offsetDays = 0) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            return d.toISOString().slice(0, 10)
+        }
+
+        // Renderers
+        function renderNews() {
+            const list = $('news-list');
+            list.innerHTML = '';
+            const items = readJSON(NEWS_KEY);
+            const filter = $('news-filter').value.trim().toLowerCase();
+            const sortVal = $('news-sort').value;
+            let filtered = items.filter(it => {
+                if (!filter) return true;
+                const hay = (it.title + ' ' + it.body + ' ' + (it.tags || []).join(' ')).toLowerCase();
+                return hay.includes(filter);
+            });
+            filtered.sort((a, b) => sortVal === 'new' ? (b.date || '').localeCompare(a.date || '') : (a.date || '').localeCompare(b.date || ''));
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="muted">No announcements found.</div>';
+                return
+            }
+            for (const it of filtered) {
+                const el = document.createElement('div');
+                el.className = 'news-item';
+                el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:start"><div><strong>${escapeHtml(it.title)}</strong><div class="meta">${escapeHtml(it.author||'Admin')} • ${escapeHtml(it.date||'')}</div></div><div><span class="pill">${(it.tags||[]).slice(0,2).join(', ')}</span></div></div><div style="margin-top:8px">${escapeHtml(it.body)}</div><div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn" data-id="${it.id}" onclick="editNews(this)">Edit</button><button class="btn" data-id="${it.id}" onclick="deleteNews(this)">Delete</button></div>`;
+                list.appendChild(el);
+            }
+        }
+
+        function renderPeople(listToShow) {
+            const list = $('people-list');
+            list.innerHTML = '';
+            const people = listToShow || readJSON(PEOPLE_KEY);
+            if (people.length === 0) {
+                list.innerHTML = '<div class="muted">No profiles yet. Create one above.</div>';
+                return
+            }
+            for (const p of people) {
+                const el = document.createElement('div');
+                el.className = 'person';
+                const initials = p.name.split(' ').map(s => s[0] || '').slice(0, 2).join('').toUpperCase();
+                el.innerHTML = `<div class="avatar">${escapeHtml(initials)}</div>
+          <div style="flex:1">
+            <div><strong>${escapeHtml(p.name)}</strong> <span class="muted">• ${escapeHtml(p.year||'')}</span></div>
+            <div class="small muted">${escapeHtml((p.subjects||[]).join(', '))} ${p.location? '• '+escapeHtml(p.location):''}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="small muted">${escapeHtml(p.mode)}</div>
+            <div style="margin-top:8px"><button class="btn" data-id="${p.id}" onclick="contact(this)">Contact</button></div>
+          </div>`;
+                list.appendChild(el);
+            }
+        }
+
+        // Actions
+        function openModal(id) {
+            $(id).classList.add('open')
+        }
+
+        function closeModal(id) {
+            $(id).classList.remove('open')
+        }
+
+        // News CRUD
+        function addNewsObject(obj) {
+            const arr = readJSON(NEWS_KEY);
+            arr.push(obj);
+            writeJSON(NEWS_KEY, arr);
+            renderNews();
+        }
+
+        function updateNewsObject(obj) {
+            const arr = readJSON(NEWS_KEY);
+            const idx = arr.findIndex(x => x.id === obj.id);
+            if (idx >= 0) arr[idx] = obj;
+            writeJSON(NEWS_KEY, arr);
+            renderNews();
+        }
+
+        function deleteNews(btn) {
+            if (!confirm('Delete this announcement?')) return;
+            const id = btn.dataset.id;
+            let arr = readJSON(NEWS_KEY);
+            arr = arr.filter(x => x.id !== id);
+            writeJSON(NEWS_KEY, arr);
+            renderNews();
+        }
+
+        function editNews(btn) {
+            const id = btn.dataset.id;
+            const arr = readJSON(NEWS_KEY);
+            const it = arr.find(x => x.id === id);
+            if (!it) return; // open modal with values
+            openModal('modal-news');
+            $('n-title').value = it.title;
+            $('n-tag').value = (it.tags || []).join(',');
+            $('n-body').value = it.body;
+            $('n-author').value = it.author || '';
+            $('n-date').value = it.date || '';
+            $('btn-add').dataset.editId = id;
+        }
+
+        // People CRUD
+        function addPerson(p) {
+            const arr = readJSON(PEOPLE_KEY);
+            arr.push(p);
+            writeJSON(PEOPLE_KEY, arr);
+            renderPeople();
+        }
+
+        // Matching algorithm (simple): score by number of overlapping subjects + same mode
+        function findMatches(filterSubject) {
+            const people = readJSON(PEOPLE_KEY);
+            if (!filterSubject) return people;
+            const wanted = filterSubject.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+            const scored = people.map(p => {
+                const subjects = (p.subjects || []).map(s => s.toLowerCase());
+                const overlap = subjects.filter(s => wanted.includes(s)).length;
+                return {
+                    ...p,
+                    score: overlap
+                };
+            }).filter(p => p.score > 0).sort((a, b) => b.score - a.score);
+            return scored;
+        }
+
+        // small helpers
+        function escapeHtml(s) {
+            if (!s && s !== 0) return '';
+            return String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+        }
+
+        // events
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNews();
+            renderPeople();
+
+            // quick news save
+            $('btn-save-quick').addEventListener('click', () => {
+                const title = $('q-title').value.trim();
+                if (!title) return alert('Add a title');
+                const body = $('q-body').value.trim();
+                if (!body) return alert('Add description');
+                const tags = $('q-tag').value.split(',').map(s => s.trim()).filter(Boolean);
+                addNewsObject({
+                    id: cryptoRandomId(),
+                    title,
+                    body,
+                    author: $('q-author').value,
+                    date: $('q-date').value || todayISO(),
+                    tags
+                });
+                // clear
+                $('q-title').value = '';
+                $('q-body').value = '';
+                $('q-tag').value = '';
+                $('q-author').value = '';
+                $('q-date').value = '';
+            });
+
+            // open modals
+            $('btn-add-news').addEventListener('click', () => openModal('modal-news'));
+            $('btn-find-partner').addEventListener('click', () => {
+                document.querySelector('html').scrollTop = 9999;
+                $('p-name').focus();
+            });
+            $('btn-clear-news').addEventListener('click', () => {
+                if (confirm('Clear ALL announcements?')) {
+                    writeJSON(NEWS_KEY, []);
+                    renderNews();
+                }
+            });
+
+            // modal buttons
+            $('btn-cancel').addEventListener('click', () => {
+                closeModal('modal-news');
+                $('btn-add').dataset.editId = '';
+            });
+            $('btn-add').addEventListener('click', () => {
+                const idEdit = $('btn-add').dataset.editId;
+                const title = $('n-title').value.trim();
+                if (!title) return alert('Title required');
+                const body = $('n-body').value.trim();
+                if (!body) return alert('Body required');
+                const tags = $('n-tag').value.split(',').map(s => s.trim()).filter(Boolean);
+                const obj = {
+                    id: idEdit || cryptoRandomId(),
+                    title,
+                    body,
+                    author: $('n-author').value,
+                    date: $('n-date').value || todayISO(),
+                    tags
+                };
+                if (idEdit) updateNewsObject(obj);
+                else addNewsObject(obj);
+                closeModal('modal-news');
+                $('btn-add').dataset.editId = '';
+                $('n-title').value = '';
+                $('n-body').value = '';
+                $('n-tag').value = '';
+                $('n-author').value = '';
+                $('n-date').value = '';
+            });
+
+            // news filter
+            $('news-filter').addEventListener('input', () => renderNews());
+            $('news-sort').addEventListener('change', () => renderNews());
+
+            // profile save
+            $('btn-save-profile').addEventListener('click', () => {
+                const name = $('p-name').value.trim();
+                if (!name) return alert('Name required');
+                const subs = $('p-subjects').value.split(',').map(s => s.trim()).filter(Boolean);
+                const obj = {
+                    id: cryptoRandomId(),
+                    name,
+                    year: $('p-year').value,
+                    subjects: subs,
+                    location: $('p-location').value,
+                    mode: $('p-mode').value,
+                    contact: $('p-contact').value
+                };
+                addPerson(obj);
+                // clear
+                $('p-name').value = '';
+                $('p-year').value = '';
+                $('p-subjects').value = '';
+                $('p-location').value = '';
+                $('p-contact').value = '';
+            });
+
+            // find matches
+            $('btn-find-matches').addEventListener('click', () => {
+                const q = $('partner-filter-sub').value.trim();
+                const matches = findMatches(q);
+                renderPeople(matches);
+            });
+
+            // contact handler
+            window.contact = function(btn) {
+                const id = btn.dataset.id;
+                const arr = readJSON(PEOPLE_KEY);
+                const p = arr.find(x => x.id === id);
+                if (!p) return;
+                alert('Contact: ' + (p.contact || 'Not shared') + '\nName: ' + p.name + '\nSubjects: ' + (p.subjects || []).join(', '));
+            }
+
+            window.deleteNews = deleteNews;
+            window.editNews = editNews;
+        });
+    </script>
+</body>
+
+</html>
